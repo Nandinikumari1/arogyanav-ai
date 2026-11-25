@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArogyaNav AI — Easy Hospital & Medicine Helper</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f9;
+      color: #1f2937;
+      margin: 0;
+      padding: 28px 16px;
+    }
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+    .header-card, .section-card, .hospital-card, .med-card, .viva-card {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+      margin-bottom: 18px;
+    }
+    .header-card {
+      border-top: 6px solid #0f766e;
+    }
+    .viva-card {
+      border-left: 6px solid #7c3aed;
+      background: #faf5ff;
+    }
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+      color: #0f766e;
+    }
+    .viva-card h2 {
+      color: #6d28d9;
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background-color: #ecfdf5;
+      color: #065f46;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 165px;
+      flex: 1;
+    }
+    select, input[type="text"], input[type="email"], input[type="password"], textarea, button {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 80px;
+      margin-bottom: 12px;
+    }
+    button {
+      background-color: #0f766e;
+      color: #ffffff;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #115e59;
+    }
+    button.secondary {
+      background-color: #334155;
+    }
+    button.viva-btn {
+      background-color: #6d28d9;
+    }
+    button.danger {
+      background-color: #b91c1c;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 8px;
+      background: #f0fdfa;
+      color: #0f766e;
+      border: 1px solid #99f6e4;
+    }
+    .score, .savings-tag {
+      float: right;
+      font-weight: bold;
+      color: #065f46;
+      background: #ecfdf5;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+    .summary-box {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .portal-links {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .portal-links a {
+      color: #0f766e;
+      font-weight: bold;
+      text-decoration: none;
+      background: #f0fdfa;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #99f6e4;
+    }
+    .auth-msg {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #0f766e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <div class="top-bar">
+        <h1 id="appTitle">ArogyaNav AI</h1>
+        <div class="top-actions">
+          <button id="langToggleBtn" class="secondary" type="button">आसान हिन्दी में देखें</button>
+          <button id="vivaToggleBtn" class="viva-btn" type="button">Viva Mode: OFF</button>
+        </div>
+      </div>
+      <p id="appSubtitle">Easy help to find nearby hospitals, check health card support, and save money on medicines.</p>
+      <div id="backendStatus" class="status-pill">Checking connection...</div>
+    </div>
+
+    <div id="vivaPanel" class="viva-card" style="display: none;">
+      <h2>Examiner / Viva Mode — How This App Works</h2>
+      <ul>
+        <li><strong>Full-Stack Setup:</strong> Simple webpage (HTML, CSS, JavaScript) talks to a Python FastAPI server, and saves data in a local SQLite database file (<code>arogyanav.db</code>).</li>
+        <li><strong>Hospital Ranking Rules:</strong> Starts at <code>50</code>, adds points when the hospital fits the visit type (checkup, tests, or staying for treatment), and adds higher points for Ayushman card support during hospital stays while noting it mainly covers hospital stays rather than routine OPD visits.</li>
+        <li><strong>Login & Saved Choices:</strong> Passwords are safely scrambled (hashed) before saving in SQLite, and your chosen city and card stay saved for next time.</li>
+        <li><strong>Cheaper Medicine Match:</strong> Matches costly brand names to their main medicine ingredient (salt) so families can ask for lower-cost generic options.</li>
+      </ul>
+    </div>
+
+    <div class="section-card">
+      <h2 id="accountHeading">Your Family Account</h2>
+      <p id="accountHelper">Make an account or log in so we remember your city and health card next time.</p>
+      <div id="loggedOutBox">
+        <div class="controls">
+          <div class="field">
+            <label id="nameLabel" for="nameInput">Your Name (for new account)</label>
+            <input id="nameInput" type="text" placeholder="Type your name" />
+          </div>
+          <div class="field">
+            <label id="emailLabel" for="emailInput">Email Address</label>
+            <input id="emailInput" type="email" placeholder="name@example.com" />
+          </div>
+          <div class="field">
+            <label id="passwordLabel" for="passwordInput">Password</label>
+            <input id="passwordInput" type="password" placeholder="At least 4 letters or numbers" />
+          </div>
+        </div>
+        <div class="controls">
+          <button id="registerBtn" type="button">Make New Account</button>
+          <button id="loginBtn" class="secondary" type="button">Log In</button>
+        </div>
+      </div>
+
+      <div id="loggedInBox" style="display: none;">
+        <p id="welcomeText"><strong>Welcome!</strong></p>
+        <div class="controls">
+          <button id="saveProfileBtn" type="button">Save My City & Health Card</button>
+          <button id="logoutBtn" class="danger" type="button">Log Out</button>
+        </div>
+      </div>
+      <div id="authMessage" class="auth-msg"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="hospitalHeading">1. Find Good Hospitals Near You</h2>
+      <div class="controls">
+        <div class="field">
+          <label id="cityLabel" for="citySelect">Which city?</label>
+          <select id="citySelect">
+            <option value="All">All Cities</option>
+            <option value="Gaya">Gaya</option>
+            <option value="Patna">Patna</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="careLabel" for="careSelect">What help do you need?</label>
+          <select id="careSelect">
+            <option value="opd">Simple Doctor Checkup (OPD)</option>
+            <option value="tests">Specialist Doctor & Tests</option>
+            <option value="admission">Staying in Hospital / Operation</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="cardLabel" for="pmjaySelect">Do you have an Ayushman or State Health Card?</label>
+          <select id="pmjaySelect">
+            <option value="false">No Card / Not Sure</option>
+            <option value="true">Yes, Have Health Card</option>
+          </select>
+        </div>
+        <button id="searchBtn" type="button">Find Hospitals</button>
+      </div>
+      <div id="resultsArea"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="medHeading">2. Find Cheaper Generic Medicines</h2>
+      <p id="medHelper">Same main medicine inside, often much cheaper at Jan Aushadhi or generic stores.</p>
+      <div class="controls">
+        <div class="field">
+          <label id="medLabel" for="medSearchInput">Type medicine name (like Dolo, Pan-D, or Atorva)</label>
+          <input id="medSearchInput" type="text" placeholder="Leave empty to see all listed medicines" />
+        </div>
+        <button id="medSearchBtn" type="button">Show Cheaper Match</button>
+      </div>
+      <div id="medResultsArea"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="rxHeading">3. Check a Doctor's Prescription Slip</h2>
+      <label id="rxLabel" for="rxInput">Type or paste the medicine names written on the slip:</label>
+      <textarea id="rxInput" placeholder="Example: Tab Dolo 650, Cap Pan-D, Tab Augmentin 625..."></textarea>
+      <button id="scanBtn" type="button">Check Possible Savings</button>
+      <div id="scanResultsArea"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="surgeryHeading">4. Rough Cost Idea for Operations</h2>
+      <div class="controls">
+        <div class="field">
+          <label id="procLabel" for="procedureSelect">Which treatment or operation?</label>
+          <select id="procedureSelect">
+            <option value="cataract">Eye Motiyabind (Cataract) Operation</option>
+            <option value="appendix">Appendix Operation</option>
+            <option value="gallbladder">Gallbladder Stone Operation</option>
+            <option value="delivery">Delivery / Childbirth Care</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="hospTypeLabel" for="hospitalTypeSelect">Where will you go?</label>
+          <select id="hospitalTypeSelect">
+            <option value="govt">Government Hospital</option>
+            <option value="private_pmjay">Private Hospital With Ayushman Card</option>
+            <option value="private_non">Private Hospital Without Card</option>
+          </select>
+        </div>
+        <button id="estimateBtn" type="button">Show Rough Cost</button>
+      </div>
+      <div id="surgeryResultArea"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="checklistHeading">5. Things to Carry to the Hospital</h2>
+      <p id="checklistHelper">Tick each item once you keep it in your bag:</p>
+      <label class="checklist-item"><input type="checkbox" /> <span class="chk-text">Aadhaar card and phone with you (for OTP message)</span></label>
+      <label class="checklist-item"><input type="checkbox" /> <span class="chk-text">Ayushman card or ration / health card (if you have one)</span></label>
+      <label class="checklist-item"><input type="checkbox" /> <span class="chk-text">Doctor's paper slip and any past test reports</span></label>
+      <label class="checklist-item"><input type="checkbox" /> <span class="chk-text">Talk to the Ayushman help desk at the hospital before paying</span></label>
+
+      <div class="portal-links">
+        <a href="https://hem.nha.gov.in/" target="_blank" rel="noopener noreferrer">Check Hospital List on Official Site (hem.nha.gov.in)</a>
+        <a href="https://beneficiary.nha.gov.in/" target="_blank" rel="noopener noreferrer">Check Card Status on Official Site (beneficiary.nha.gov.in)</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+  ? "http://127.0.0.1:8000"
+  : "https://YOUR-RENDER-URL.onrender.com";
+    const TOKEN_KEY = "arogyanav_token";
+    let currentLang = "en";
+    let vivaOpen = false;
+
+    const TRANSLATIONS = {
+      en: {
+        appTitle: "ArogyaNav AI",
+        appSubtitle: "Easy help to find nearby hospitals, check health card support, and save money on medicines.",
+        accountHeading: "Your Family Account",
+        accountHelper: "Make an account or log in so we remember your city and health card next time.",
+        nameLabel: "Your Name (for new account)",
+        emailLabel: "Email Address",
+        passwordLabel: "Password",
+        registerBtn: "Make New Account",
+        loginBtn: "Log In",
+        saveProfileBtn: "Save My City & Health Card",
+        logoutBtn: "Log Out",
+        hospitalHeading: "1. Find Good Hospitals Near You",
+        cityLabel: "Which city?",
+        careLabel: "What help do you need?",
+        cardLabel: "Do you have an Ayushman or State Health Card?",
+        searchBtn: "Find Hospitals",
+        medHeading: "2. Find Cheaper Generic Medicines",
+        medHelper: "Same main medicine inside, often much cheaper at Jan Aushadhi or generic stores.",
+        medLabel: "Type medicine name (like Dolo, Pan-D, or Atorva)",
+        medSearchBtn: "Show Cheaper Match",
+        rxHeading: "3. Check a Doctor's Prescription Slip",
+        rxLabel: "Type or paste the medicine names written on the slip:",
+        scanBtn: "Check Possible Savings",
+        surgeryHeading: "4. Rough Cost Idea for Operations",
+        procLabel: "Which treatment or operation?",
+        hospTypeLabel: "Where will you go?",
+        estimateBtn: "Show Rough Cost",
+        checklistHeading: "5. Things to Carry to the Hospital",
+        checklistHelper: "Tick each item once you keep it in your bag:",
+        chkTexts: [
+          "Aadhaar card and phone with you (for OTP message)",
+          "Ayushman card or ration / health card (if you have one)",
+          "Doctor's paper slip and any past test reports",
+          "Talk to the Ayushman help desk at the hospital before paying",
+        ],
+        langBtn: "आसान हिन्दी में देखें",
+      },
+      hi: {
+        appTitle: "आरोग्यनाव AI",
+        appSubtitle: "आसानी से अस्पताल खोजें, हेल्थ कार्ड की जानकारी लें और दवाइयों पर पैसे बचाएं।",
+        accountHeading: "आपका परिवार खाता",
+        accountHelper: "खाता बनाएं या लॉग इन करें ताकि अगली बार आपका शहर और कार्ड याद रहे।",
+        nameLabel: "आपका नाम (नया खाता बनाने के लिए)",
+        emailLabel: "ईमेल पता",
+        passwordLabel: "पासवर्ड",
+        registerBtn: "नया खाता बनाएं",
+        loginBtn: "लॉग इन करें",
+        saveProfileBtn: "मेरा शहर और हेल्थ कार्ड सेव करें",
+        logoutBtn: "बाहर निकलें (Log Out)",
+        hospitalHeading: "1. अपने पास अच्छा अस्पताल खोजें",
+        cityLabel: "कौन सा शहर?",
+        careLabel: "आपको किस तरह की मदद चाहिए?",
+        cardLabel: "क्या आपके पास आयुष्मान या राज्य का हेल्थ कार्ड है?",
+        searchBtn: "अस्पताल देखें",
+        medHeading: "2. सस्ती जेनेरिक दवाई खोजें",
+        medHelper: "अंदर वही मुख्य दवाई होती है, जन औषधि या जेनेरिक दुकान पर अक्सर काफी सस्ती मिलती है।",
+        medLabel: "दवाई का नाम लिखें (जैसे Dolo, Pan-D या Atorva)",
+        medSearchBtn: "सस्ता विकल्प देखें",
+        rxHeading: "3. डॉक्टर की पर्ची जांचें",
+        rxLabel: "पर्ची पर लिखी दवाइयों के नाम यहां लिखें या चिपकाएं:",
+        scanBtn: "संभावित बचत देखें",
+        surgeryHeading: "4. ऑपरेशन का अंदाज़ा खर्च",
+        procLabel: "कौन सा इलाज या ऑपरेशन है?",
+        hospTypeLabel: "आप कहां जाएंगे?",
+        estimateBtn: "अंदाज़ा खर्च देखें",
+        checklistHeading: "5. अस्पताल जाते समय साथ रखने वाली चीज़ें",
+        checklistHelper: "बैग में रखने के बाद हर चीज़ पर टिक करें:",
+        chkTexts: [
+          "आधार कार्ड और साथ में फ़ोन (OTP मैसेज के लिए)",
+          "आयुष्मान कार्ड या राशन / हेल्थ कार्ड (यदि हो तो)",
+          "डॉक्टर की पर्ची और पुरानी जांच की रिपोर्ट",
+          "पैसे देने से पहले अस्पताल के आयुष्मान हेल्प डेस्क से बात करें",
+        ],
+        langBtn: "Switch to Easy English",
+      },
+    };
+
+    const SURGERY_ESTIMATES = {
+      cataract: { label: "Eye Motiyabind (Cataract) Operation", privateBase: 22000, govtBase: 1500 },
+      appendix: { label: "Appendix Operation", privateBase: 45000, govtBase: 3000 },
+      gallbladder: { label: "Gallbladder Stone Operation", privateBase: 55000, govtBase: 4000 },
+      delivery: { label: "Delivery / Childbirth Care", privateBase: 38000, govtBase: 2000 },
+    };
+
+    function toggleLanguage() {
+      currentLang = currentLang === "en" ? "hi" : "en";
+      const t = TRANSLATIONS[currentLang];
+      document.getElementById("appTitle").textContent = t.appTitle;
+      document.getElementById("appSubtitle").textContent = t.appSubtitle;
+      document.getElementById("accountHeading").textContent = t.accountHeading;
+      document.getElementById("accountHelper").textContent = t.accountHelper;
+      document.getElementById("nameLabel").textContent = t.nameLabel;
+      document.getElementById("emailLabel").textContent = t.emailLabel;
+      document.getElementById("passwordLabel").textContent = t.passwordLabel;
+      document.getElementById("registerBtn").textContent = t.registerBtn;
+      document.getElementById("loginBtn").textContent = t.loginBtn;
+      document.getElementById("saveProfileBtn").textContent = t.saveProfileBtn;
+      document.getElementById("logoutBtn").textContent = t.logoutBtn;
+      document.getElementById("hospitalHeading").textContent = t.hospitalHeading;
+      document.getElementById("cityLabel").textContent = t.cityLabel;
+      document.getElementById("careLabel").textContent = t.careLabel;
+      document.getElementById("cardLabel").textContent = t.cardLabel;
+      document.getElementById("searchBtn").textContent = t.searchBtn;
+      document.getElementById("medHeading").textContent = t.medHeading;
+      document.getElementById("medHelper").textContent = t.medHelper;
+      document.getElementById("medLabel").textContent = t.medLabel;
+      document.getElementById("medSearchBtn").textContent = t.medSearchBtn;
+      document.getElementById("rxHeading").textContent = t.rxHeading;
+      document.getElementById("rxLabel").textContent = t.rxLabel;
+      document.getElementById("scanBtn").textContent = t.scanBtn;
+      document.getElementById("surgeryHeading").textContent = t.surgeryHeading;
+      document.getElementById("procLabel").textContent = t.procLabel;
+      document.getElementById("hospTypeLabel").textContent = t.hospTypeLabel;
+      document.getElementById("estimateBtn").textContent = t.estimateBtn;
+      document.getElementById("checklistHeading").textContent = t.checklistHeading;
+      document.getElementById("checklistHelper").textContent = t.checklistHelper;
+      document.getElementById("langToggleBtn").textContent = t.langBtn;
+
+      const chkSpans = document.querySelectorAll(".chk-text");
+      chkSpans.forEach((span, idx) => {
+        if (t.chkTexts[idx]) span.textContent = t.chkTexts[idx];
+      });
+    }
+
+    function toggleVivaMode() {
+      vivaOpen = !vivaOpen;
+      document.getElementById("vivaPanel").style.display = vivaOpen ? "block" : "none";
+      document.getElementById("vivaToggleBtn").textContent = vivaOpen ? "Viva Mode: ON" : "Viva Mode: OFF";
+    }
+
+    function estimateSurgeryCost() {
+      const procKey = document.getElementById("procedureSelect").value;
+      const setting = document.getElementById("hospitalTypeSelect").value;
+      const hasPmjay = document.getElementById("pmjaySelect").value === "true";
+      const item = SURGERY_ESTIMATES[procKey];
+
+      let outOfPocket = item.privateBase;
+      let guidance = "";
+
+      if (setting === "govt") {
+        outOfPocket = hasPmjay ? 0 : item.govtBase;
+        guidance = hasPmjay
+          ? "With an approved Ayushman card in a government hospital, covered treatment is usually free (₹0 package fee). Still check with the help desk about extra supplies."
+          : "Government hospitals usually charge very small fees. Carry your ID and doctor slip.";
+      } else if (setting === "private_pmjay") {
+        outOfPocket = hasPmjay ? 0 : item.privateBase;
+        guidance = hasPmjay
+          ? "If your operation and room type are approved under the health card before admission, covered charges can be cashless."
+          : "Without a health card, normal private hospital rates will apply.";
+      } else {
+        outOfPocket = item.privateBase;
+        guidance = "A private hospital without card tie-up usually charges full regular fees from your pocket.";
+      }
+
+      document.getElementById("surgeryResultArea").innerHTML = `
+        <div class="summary-box">
+          <strong>Treatment:</strong> ${item.label}<br />
+          <strong>Normal Private Cost (Without Card):</strong> ₹${item.privateBase.toLocaleString("en-IN")}<br />
+          <strong>Rough Cost From Your Pocket:</strong> ₹${outOfPocket.toLocaleString("en-IN")}<br />
+          <strong>Helpful Note:</strong> ${guidance}
+        </div>
+      `;
+    }
+
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    }
+
+    function setAuthUI(user) {
+      const loggedOutBox = document.getElementById("loggedOutBox");
+      const loggedInBox = document.getElementById("loggedInBox");
+      if (user) {
+        loggedOutBox.style.display = "none";
+        loggedInBox.style.display = "block";
+        document.getElementById("welcomeText").innerHTML =
+          `<strong>Signed in as ${user.full_name}</strong> (${user.email}) — Saved City: <strong>${user.saved_city}</strong>, Health Card: <strong>${user.has_pmjay ? "Yes" : "No"}</strong>`;
+        document.getElementById("citySelect").value = user.saved_city || "All";
+        document.getElementById("pmjaySelect").value = user.has_pmjay ? "true" : "false";
+      } else {
+        loggedOutBox.style.display = "block";
+        loggedInBox.style.display = "none";
+      }
+    }
+
+    async function restoreSession() {
+      const token = getToken();
+      if (!token) {
+        setAuthUI(null);
+        return;
+      }
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        localStorage.removeItem(TOKEN_KEY);
+        setAuthUI(null);
+        return;
+      }
+      const user = await res.json();
+      setAuthUI(user);
+    }
+
+    async function handleRegister() {
+      const full_name = document.getElementById("nameInput").value;
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      const msg = document.getElementById("authMessage");
+
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msg.textContent = data.detail || "Could not make account.";
+        return;
+      }
+      localStorage.setItem(TOKEN_KEY, data.token);
+      msg.textContent = "Account made and logged in!";
+      setAuthUI(data.user);
+      loadHospitals();
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById("emailInput").value;
+      const password = document.getElementById("passwordInput").value;
+      const msg = document.getElementById("authMessage");
+
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        msg.textContent = data.detail || "Login did not work.";
+        return;
+      }
+      localStorage.setItem(TOKEN_KEY, data.token);
+      msg.textContent = "Welcome back! Loaded your saved choices.";
+      setAuthUI(data.user);
+      loadHospitals();
+    }
+
+    async function handleSaveProfile() {
+      const token = getToken();
+      const saved_city = document.getElementById("citySelect").value;
+      const has_pmjay = document.getElementById("pmjaySelect").value === "true";
+      const msg = document.getElementById("authMessage");
+
+      const res = await fetch(`${API_BASE}/api/auth/profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ saved_city, has_pmjay }),
+      });
+      const data = await res.json();
+      msg.textContent = data.message || data.detail || "Saved.";
+      await restoreSession();
+    }
+
+    async function handleLogout() {
+      const token = getToken();
+      if (token) {
+        await fetch(`${API_BASE}/api/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      localStorage.removeItem(TOKEN_KEY);
+      document.getElementById("authMessage").textContent = "You are logged out.";
+      setAuthUI(null);
+    }
+
+    async function checkBackend() {
+      const statusBox = document.getElementById("backendStatus");
+      try {
+        const res = await fetch(`${API_BASE}/`);
+        const data = await res.json();
+        statusBox.textContent = `Connected to helper server (${data.status})`;
+      } catch (err) {
+        statusBox.textContent = "Helper server is off — check VS Code terminal";
+      }
+    }
+
+    async function loadHospitals() {
+      const city = document.getElementById("citySelect").value;
+      const careType = document.getElementById("careSelect").value;
+      const hasPmjay = document.getElementById("pmjaySelect").value;
+      const resultsArea = document.getElementById("resultsArea");
+
+      const url = `${API_BASE}/api/hospitals?city=${encodeURIComponent(city)}&care_type=${encodeURIComponent(careType)}&has_pmjay=${encodeURIComponent(hasPmjay)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.hospitals.length) {
+        resultsArea.innerHTML = "<p>No hospitals found for this choice.</p>";
+        return;
+      }
+
+      resultsArea.innerHTML = data.hospitals.map((h) => `
+        <div class="hospital-card">
+          <span class="score">Fit: ${h.match_score}%</span>
+          <h3>${h.name}</h3>
+          <span class="badge">${h.city}</span>
+          <span class="badge">${h.tier}</span>
+          <span class="badge">${h.pmjay_supported ? "Health Card Supported" : "No Health Card Listed"}</span>
+          <p><strong>Why it shows up here:</strong> ${h.match_reason}</p>
+          <p><strong>Rough Checkup Fee:</strong> ₹${h.est_opd_inr} &nbsp;|&nbsp; <strong>Rough Stay Cost:</strong> ₹${h.est_admission_inr}</p>
+          <p>${h.note}</p>
+        </div>
+      `).join("");
+    }
+
+    async function loadMedicines() {
+      const q = document.getElementById("medSearchInput").value;
+      const medArea = document.getElementById("medResultsArea");
+      const res = await fetch(`${API_BASE}/api/medicines?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+
+      if (!data.medicines.length) {
+        medArea.innerHTML = "<p>No matching medicine found in our sample list. Try Dolo, Pan-D, Augmentin, or Atorva.</p>";
+        return;
+      }
+
+      medArea.innerHTML = data.medicines.map((m) => `
+        <div class="med-card">
+          <span class="savings-tag">Save ~₹${m.savings_inr}</span>
+          <h3>Main Medicine: ${m.salt}</h3>
+          <span class="badge">Common Brand Example: ${m.brand_example}</span>
+          <p><strong>Brand Price (Rough):</strong> ₹${m.branded_inr} &nbsp;|&nbsp; <strong>Generic Price (Rough):</strong> ₹${m.generic_inr}</p>
+          <p>${m.use_note}</p>
+        </div>
+      `).join("");
+    }
+
+    async function scanPrescription() {
+      const text = document.getElementById("rxInput").value;
+      const scanArea = document.getElementById("scanResultsArea");
+
+      const res = await fetch(`${API_BASE}/api/scan-prescription`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+
+      if (!data.matched_count) {
+        scanArea.innerHTML = "<p class='summary-box'>No medicine names matched yet. Try writing <em>Dolo 650</em> or <em>Pan-D</em>.</p>";
+        return;
+      }
+
+      scanArea.innerHTML = `
+        <div class="summary-box">
+          <strong>Medicines Found:</strong> ${data.matched_count}<br />
+          <strong>Brand Total (Rough):</strong> ₹${data.total_branded_inr} &nbsp;|&nbsp;
+          <strong>Generic Total (Rough):</strong> ₹${data.total_generic_inr} &nbsp;|&nbsp;
+          <strong>Rough Money Saved:</strong> ₹${data.total_savings_inr}
+        </div>
+      `;
+    }
+
+    document.getElementById("langToggleBtn").addEventListener("click", toggleLanguage);
+    document.getElementById("vivaToggleBtn").addEventListener("click", toggleVivaMode);
+    document.getElementById("estimateBtn").addEventListener("click", estimateSurgeryCost);
+    document.getElementById("registerBtn").addEventListener("click", handleRegister);
+    document.getElementById("loginBtn").addEventListener("click", handleLogin);
+    document.getElementById("saveProfileBtn").addEventListener("click", handleSaveProfile);
+    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+    document.getElementById("searchBtn").addEventListener("click", loadHospitals);
+    document.getElementById("medSearchBtn").addEventListener("click", loadMedicines);
+    document.getElementById("scanBtn").addEventListener("click", scanPrescription);
+
+    async function initApp() {
+      await checkBackend();
+      await restoreSession();
+      await loadHospitals();
+      await loadMedicines();
+      estimateSurgeryCost();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
