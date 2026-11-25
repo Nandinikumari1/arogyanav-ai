@@ -1,28 +1,10 @@
-<!-- # ArogyaNav AI
-
-A simple full-stack healthcare helper web app for families to find nearby hospitals, check health card support, compare cheaper generic medicines, and estimate treatment costs in easy English and Hindi.
-
-## Tech Stack
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Python, FastAPI, Uvicorn
-- **Database:** SQLite
-
-## Run Locally
-1. Start backend:
-   ```bash
-   cd backend
-   python -m venv venv
-   venv\Scripts\activate
-   pip install -r requirements.txt
-   uvicorn main:app --reload -->
-
 # ArogyaNav AI — Family Hospital & Generic Medicine Companion
 
 A full-stack healthcare navigation and out-of-pocket cost-reduction web application for Indian families. It combines a **3-layer hospital care triage engine** with a **bipartite branded-to-generic medicine knowledge graph** (PMBJP Jan Aushadhi), helping households find nearby hospitals, check health card support, compare cheaper generic medicines, and estimate treatment costs in English and Hindi.
 
 ## Live Links
-- **Live Web App (Frontend):** `https://nandinikumari1.github.io/arogyanav-ai/` *(Update once deployed)*
-- **Live Backend API (FastAPI):** `https://arogyanav-api.onrender.com` *(Update with your Render URL)*
+- **Live Web App (Frontend):** `https://nandinikumari1.github.io/arogyanav-ai/frontend/index.html`
+- **Live Backend API (FastAPI):** `https://arogyanav-api.onrender.com`
 - **Interactive API Docs (Swagger UI):** `https://arogyanav-api.onrender.com/docs`
 
 ## Key Features
@@ -37,6 +19,7 @@ A full-stack healthcare navigation and out-of-pocket cost-reduction web applicat
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
 - **Backend:** Python 3, FastAPI, Uvicorn, Pydantic
 - **Database:** SQLite (`arogyanav.db`)
+- **Hosting:** GitHub Pages (Frontend) + Render (FastAPI Backend)
 
 ## Run Locally
 1. **Start the backend:**
