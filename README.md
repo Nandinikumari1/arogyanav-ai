@@ -22,8 +22,8 @@ A full-stack healthcare navigation and out-of-pocket cost-reduction web applicat
 
 ## Live Links
 - **Live Web App (Frontend):** `https://nandinikumari1.github.io/arogyanav-ai/` *(Update once deployed)*
-- **Live Backend API (FastAPI):** `https://YOUR-RENDER-URL.onrender.com` *(Update with your Render URL)*
-- **Interactive API Docs (Swagger UI):** `https://YOUR-RENDER-URL.onrender.com/docs`
+- **Live Backend API (FastAPI):** `https://arogyanav-api.onrender.com` *(Update with your Render URL)*
+- **Interactive API Docs (Swagger UI):** `https://arogyanav-api.onrender.com/docs`
 
 ## Key Features
 - **3-Layer Care Triage & Hospital Ranking:** Prioritizes low-cost Government & Charitable clinics (₹10–₹150 OPD) for routine checkups, matches specialists with PM-JAY continuity, and filters ₹0 cashless admission/surgery facilities across 100 hospitals in 10 Indian cities.
@@ -46,4 +46,3 @@ A full-stack healthcare navigation and out-of-pocket cost-reduction web applicat
    venv\Scripts\activate
    pip install -r requirements.txt
    uvicorn main:app --reload
-   
